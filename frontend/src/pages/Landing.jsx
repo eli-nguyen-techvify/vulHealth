@@ -56,7 +56,9 @@ export default function Landing() {
             </div>
           </div>
           <div className="illus">
-            <div className="illus-emoji">🩺</div>
+            <div className="illus-emoji">
+              <img src="https://api.iconify.design/ph/stethoscope-duotone.svg?color=%234338ca&width=340" alt="" />
+            </div>
           </div>
         </div>
       </section>
@@ -86,7 +88,9 @@ export default function Landing() {
                 <li>Nothing feels built for you.</li>
               </ul>
             </div>
-            <div className="illus-side">👩‍⚕️</div>
+            <div className="illus-side">
+              <img src="https://api.iconify.design/ph/calendar-x-duotone.svg?color=%234338ca&width=220" alt="" />
+            </div>
           </div>
         </div>
       </section>
@@ -104,7 +108,9 @@ export default function Landing() {
                 <li>Complete medical history at your fingertips.</li>
               </ul>
             </div>
-            <div className="illus-side">💊</div>
+            <div className="illus-side">
+              <img src="https://api.iconify.design/ph/heartbeat-duotone.svg?color=%234338ca&width=220" alt="" />
+            </div>
           </div>
         </div>
       </section>
@@ -115,17 +121,23 @@ export default function Landing() {
           <h2 style={{textAlign:'center', marginBottom:44}}>How VulHealth works</h2>
           <div className="features">
             <div className="feature">
-              <div className="emoji">🩺</div>
+              <div className="emoji">
+                <img src="https://api.iconify.design/ph/magnifying-glass-duotone.svg?color=%234338ca&width=32" alt="" />
+              </div>
               <h3>Find a doctor</h3>
               <p>Browse our directory by specialty, department, or name.</p>
             </div>
             <div className="feature">
-              <div className="emoji">📅</div>
+              <div className="emoji">
+                <img src="https://api.iconify.design/ph/calendar-check-duotone.svg?color=%234338ca&width=32" alt="" />
+              </div>
               <h3>Book in seconds</h3>
               <p>Pick a time that works for you. No phone calls, no waiting rooms.</p>
             </div>
             <div className="feature">
-              <div className="emoji">💬</div>
+              <div className="emoji">
+                <img src="https://api.iconify.design/ph/chat-circle-dots-duotone.svg?color=%234338ca&width=32" alt="" />
+              </div>
               <h3>Stay connected</h3>
               <p>Message your doctor and access records 24/7 from any device.</p>
             </div>
@@ -159,7 +171,10 @@ export default function Landing() {
               <div className="doctor-card" key={d.id}>
                 <h3>{d.fullName}</h3>
                 <p><small>@{d.username}</small></p>
-                <p>📞 {d.phone}</p>
+                <p style={{display:'flex',alignItems:'center',gap:6}}>
+                  <img src="https://api.iconify.design/ph/phone-duotone.svg?color=%234338ca&width=16" alt="" />
+                  {d.phone}
+                </p>
                 <Link to={`/doctors/${d.id}`}>View profile →</Link>
               </div>
             ))}

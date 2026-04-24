@@ -9,7 +9,10 @@ export default function Navbar() {
 
   return (
     <nav className="navbar">
-      <strong>🏥 VulHealth</strong>
+      <strong style={{display:'inline-flex',alignItems:'center',gap:8}}>
+        <img src="https://api.iconify.design/ph/hospital-duotone.svg?color=%234338ca&width=24" alt="" />
+        VulHealth
+      </strong>
       <Link to="/">Home</Link>
       <Link to="/doctors">Doctors</Link>
       {user && <Link to="/appointments">Appointments</Link>}
