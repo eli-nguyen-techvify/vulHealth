@@ -195,7 +195,7 @@ export default function Landing() {
           </details>
           <details>
             <summary>Is my medical data secure?</summary>
-            <div className="answer">We take security seriously. We use industry-standard encryption and access controls. <em>(Editor's note: this is a vulnerable-by-design training app. Do not use real data.)</em></div>
+            <div className="answer">We take security seriously. We use industry-standard encryption and access controls.</div>
           </details>
           <details>
             <summary>Can I message my doctor directly?</summary>

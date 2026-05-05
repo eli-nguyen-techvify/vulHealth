@@ -93,9 +93,10 @@ No foreign-key constraints are declared in SQL — the relationships above are e
 | `avatarUrl`    | TEXT    | Relative `/uploads/...` path, or absolute URL                                  |
 | `departmentId` | INTEGER | FK → `departments.id` (doctors only)                                           |
 | `bio`          | TEXT    | HTML allowed — rendered on doctor profile with `dangerouslySetInnerHTML`       |
+| `banned`       | INTEGER | `0`/`1`. Added via lazy `ALTER TABLE` on first boot of the admin router        |
 | `createdAt`    | TEXT    | Default `CURRENT_TIMESTAMP`                                                    |
 
-Seed count: **32** (1 admin + 10 doctors + 20 patients + 1 receptionist).
+Seed count: **50** (1 admin + 15 doctors + 33 patients + 1 receptionist).
 
 ### `departments`
 | Column         | Type    | Notes                                      |
@@ -119,7 +120,7 @@ Seed count: **6** (Cardiology, Internal Medicine, Dermatology, Pediatrics, Obste
 | `reason`        | TEXT    | Free-text patient-supplied reason                               |
 | `createdAt`     | TEXT    | Default `CURRENT_TIMESTAMP`                                     |
 
-Seed count: **30**.
+Seed count: **70**.
 
 ### `medical_records`
 | Column           | Type    | Notes                                                                 |
@@ -134,7 +135,7 @@ Seed count: **30**.
 | `attachmentPath` | TEXT    | Relative path into `backend/uploads/`                                 |
 | `createdAt`      | TEXT    | Default `CURRENT_TIMESTAMP`                                           |
 
-Seed count: **30**. Sample records deliberately reference sensitive details (HIV status, mental health, substance abuse) to dramatise the impact of BOLA/IDOR leakage in `/api/records/:id`.
+Seed count: **37**. Sample records deliberately reference sensitive details (HIV status, mental health, substance abuse) to dramatise the impact of BOLA/IDOR leakage in `/api/records/:id`.
 
 ### `messages`
 | Column       | Type    | Notes                                        |
@@ -147,7 +148,7 @@ Seed count: **30**. Sample records deliberately reference sensitive details (HIV
 | `createdAt`  | TEXT    |                                              |
 | `readAt`     | TEXT    | Null until the recipient opens the message   |
 
-Seed count: **5**.
+Seed count: **70**.
 
 ### `password_resets`
 | Column      | Type    | Notes                                   |
@@ -157,6 +158,21 @@ Seed count: **5**.
 | `token`     | TEXT    | `md5(email + Date.now())` (predictable) |
 | `createdAt` | TEXT    |                                         |
 | `usedAt`    | TEXT    | Null until the token is consumed        |
+
+### `audit_log`
+Created lazily by `backend/src/routes/admin.js` on first boot. Used by the safe admin routes (delete user, reset password, ban / unban). Seed count: **0**.
+
+| Column          | Type    | Notes                                                |
+|-----------------|---------|------------------------------------------------------|
+| `id`            | INTEGER | PK                                                   |
+| `actorId`       | INTEGER | `users.id` of the admin who performed the action     |
+| `actorUsername` | TEXT    | Snapshot of actor's username                         |
+| `action`        | TEXT    | e.g. `user.delete`, `user.reset-password`, `user.ban`|
+| `targetType`    | TEXT    | e.g. `user`                                          |
+| `targetId`      | INTEGER | `id` of the target entity                            |
+| `details`       | TEXT    | JSON-encoded metadata                                |
+| `ip`            | TEXT    | `req.ip`                                             |
+| `createdAt`     | TEXT    | Default `CURRENT_TIMESTAMP`                          |
 
 ## Indexes
 
@@ -179,4 +195,4 @@ docker compose restart backend   # re-runs seed.sql on first connection
 | Predictable reset tokens             | `password_resets.token`            | Demonstrates A04 Insecure Design     |
 | No audit log table                   | —                                  | A09 Security Logging Failures        |
 
-See [`06-security-notes.md`](./06-security-notes.md) for the full catalogue.
+See [`../06-security-notes.md`](../06-security-notes.md) for the full catalogue.

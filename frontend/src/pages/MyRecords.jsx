@@ -1,21 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../api';
+import api, { currentUser } from '../api';
 
 export default function MyRecords() {
   const [list, setList] = useState([]);
   const [err, setErr] = useState('');
+  const user = currentUser();
 
   useEffect(() => {
+    if (!user) return;
     api.get('/records/mine').then(r => setList(r.data)).catch(e => setErr(e.response?.data?.error || e.message));
-  }, []);
+  }, [user]);
 
   if (err) return <div className="error">{err}</div>;
 
   return (
     <div className="card">
       <h2>My Medical Records</h2>
-      <p><small>Hint: try visiting <code>/records/1</code>, <code>/records/2</code>, … and see if you can read other patients' records (BOLA).</small></p>
       <table>
         <thead><tr><th>ID</th><th>Date</th><th>Doctor</th><th>Diagnosis</th></tr></thead>
         <tbody>
@@ -29,7 +30,11 @@ export default function MyRecords() {
           ))}
         </tbody>
       </table>
-      {!list.length && <p>No records yet.</p>}
+      {!list.length && (
+        user
+          ? <p>No records yet.</p>
+          : <p>Bạn chưa có hồ sơ bệnh án nào. <Link to="/login">Đăng nhập</Link> để xem hồ sơ của bạn.</p>
+      )}
     </div>
   );
 }

@@ -34,6 +34,34 @@ router.get('/mine', requireAuth, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// Records authored by the currently logged-in doctor
+router.get('/by-doctor', requireAuth, async (req, res, next) => {
+  try {
+    const rows = await all(
+      `SELECT r.*, p.fullName AS patientName, p.dob AS patientDob
+       FROM medical_records r
+       JOIN users p ON p.id = r.patientId
+       WHERE r.doctorId = ? ORDER BY r.createdAt DESC`,
+      [req.user.id]
+    );
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// Records for a specific patient (used by doctor's patient panel)
+router.get('/by-patient/:patientId', requireAuth, async (req, res, next) => {
+  try {
+    const rows = await all(
+      `SELECT r.*, d.fullName AS doctorName
+       FROM medical_records r
+       JOIN users d ON d.id = r.doctorId
+       WHERE r.patientId = ? ORDER BY r.createdAt DESC`,
+      [req.params.patientId]
+    );
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
 // VULN A01 (CRITICAL — BOLA): any authenticated user can fetch any medical record.
 // Shannon should flag this as a HIPAA-level severity.
 router.get('/:id', requireAuth, async (req, res, next) => {

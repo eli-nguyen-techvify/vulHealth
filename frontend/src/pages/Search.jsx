@@ -16,7 +16,6 @@ export default function Search() {
 
   return (
     <div className="card">
-      {/* VULN: reflected XSS via dangerouslySetInnerHTML */}
       <h2>Results for: <span dangerouslySetInnerHTML={{ __html: q }} /></h2>
       {err && <div className="error">{err}</div>}
       <ul>

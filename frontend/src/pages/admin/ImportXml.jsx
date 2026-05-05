@@ -17,7 +17,6 @@ export default function ImportXml() {
   return (
     <div className="card">
       <h2>Import Departments from URL</h2>
-      <p><small>Supply any URL — we'll fetch it server-side.</small></p>
       <input value={url} onChange={e=>setUrl(e.target.value)} placeholder="http://example.com/departments.xml" style={{maxWidth:500}} />
       <button onClick={fetchIt} style={{marginLeft:8}}>Fetch</button>
       {err && <div className="error">{err}</div>}

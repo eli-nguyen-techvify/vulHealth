@@ -16,6 +16,7 @@ export default function Login() {
       setAuth(data.token, data.user);
       if (data.user.role === 'admin') nav('/admin');
       else if (data.user.role === 'doctor') nav('/doctor');
+      else if (data.user.role === 'receptionist') nav('/appointments');
       else nav('/');
     } catch (e) {
       setErr(e.response?.data?.error || e.message);
@@ -38,7 +39,6 @@ export default function Login() {
       <p style={{ marginTop: 16 }}>
         <Link to="/register">Create an account</Link> · <Link to="/forgot-password">Forgot password?</Link>
       </p>
-      <small>Seeded accounts: admin/admin123 · alice/password · bob/123456 · dr.smith/smith2024</small>
     </div>
   );
 }

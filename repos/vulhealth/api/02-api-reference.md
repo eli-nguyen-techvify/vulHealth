@@ -36,9 +36,12 @@ All endpoints are served from the Express backend at **`http://localhost:3001`**
 | POST | `/api/appointments` | ✓ | patient | Book |
 | GET  | `/api/appointments/mine` | ✓ | any | List my appointments |
 | GET  | `/api/appointments/:id` | ✓ | any | Appointment detail |
+| PATCH | `/api/appointments/:id/status` | ✓ | any | Update appointment status |
 | DELETE | `/api/appointments/:id` | ✓ | any | Cancel |
 | POST | `/api/records` | ✓ | doctor | Create record |
 | GET  | `/api/records/mine` | ✓ | patient | My records |
+| GET  | `/api/records/by-doctor` | ✓ | doctor | Records authored by current doctor |
+| GET  | `/api/records/by-patient/:patientId` | ✓ | doctor | Records for a given patient |
 | GET  | `/api/records/:id` | ✓ | any | Record detail |
 | PUT  | `/api/records/:id` | ✓ | doctor | Update record |
 | POST | `/api/records/:id/attachment` | ✓ | doctor | Attach file |
@@ -49,6 +52,14 @@ All endpoints are served from the Express backend at **`http://localhost:3001`**
 | GET  | `/api/messages/:id` | ✓ | any | Message body |
 | GET  | `/api/admin/users` | ✓ | admin | List all users |
 | PUT  | `/api/admin/users/:id` | ✓ | admin | Update any user |
+| DELETE | `/api/admin/users/:id` | ✓ | admin | Delete a user (audit-logged) |
+| POST | `/api/admin/users/:id/reset-password` | ✓ | admin | Generate a one-time temp password |
+| POST | `/api/admin/users/:id/ban` | ✓ | admin | Mark `users.banned = 1` |
+| POST | `/api/admin/users/:id/unban` | ✓ | admin | Mark `users.banned = 0` |
+| GET  | `/api/admin/appointments` | ✓ | admin | All appointments (paginated, status filter) |
+| GET  | `/api/admin/records` | ✓ | admin | All medical records (paginated) |
+| GET  | `/api/admin/stats` | ✓ | admin | Counts by role/status/total |
+| GET  | `/api/admin/audit-log` | ✓ | admin | Recent admin activity (paginated) |
 | POST | `/api/admin/ping` | ✓ | admin | Diagnostic ping |
 | POST | `/api/admin/backup` | ✓ | admin | Backup DB |
 | GET  | `/api/admin/logs?file=` | ✓ | admin | Read log file |
@@ -194,6 +205,17 @@ Returns appointments for the authenticated user (patient or doctor view is auto-
 ### `GET /api/appointments/:id`
 Full joined view with patient & doctor names, department.
 
+### `PATCH /api/appointments/:id/status`
+Update the status of an appointment. Used by the doctor's *Write Record* flow to mark a visit `done` after saving the record, and by future receptionist check-in.
+
+Request:
+```json
+{ "status": "done" }
+```
+`status` must be one of `booked`, `checked_in`, `done`, `cancelled` (else 400).
+
+Response: `{ "message": "updated", "status": "done" }`.
+
 ### `DELETE /api/appointments/:id`
 Marks the appointment as `cancelled` (status update, soft delete). Returns `{ "message": "cancelled" }`.
 
@@ -217,6 +239,12 @@ Request:
 
 ### `GET /api/records/mine`
 Records where `patientId == me`, joined with doctor name.
+
+### `GET /api/records/by-doctor`
+Records authored by the current authenticated user (typically a doctor). Joined with patient name & DOB. Used by the doctor *My Patients* and *Write Record* pages.
+
+### `GET /api/records/by-patient/:patientId`
+Records for the supplied patient ID, joined with doctor name. Used when a doctor opens a patient detail card. *(Access is intentionally not gated to doctor-of-record — same A01 BOLA pattern as `/records/:id`.)*
 
 ### `GET /api/records/:id`
 Joined with patient name, DOB, and doctor name.
@@ -279,6 +307,48 @@ Reads a file from `data/logs/`.
 { "url": "https://hospital-ops.example/departments.xml" }
 ```
 The server fetches the URL and returns a preview of the body.
+
+### Safe admin routes (newly added)
+
+These routes are properly gated with `requireAuth + requireRole('admin')`, validate input, use parameterised SQL, and write to `audit_log`. Used by the redesigned Admin Dashboard.
+
+#### `DELETE /api/admin/users/:id`
+Delete a user. Refuses to delete the current admin or the last remaining admin. Audit-logged. Response: `{ "message": "deleted", "id": 12 }`.
+
+#### `POST /api/admin/users/:id/reset-password`
+Generate a 16-char random temp password, store its MD5 hash, and return the plaintext for the admin to share with the user.
+Response:
+```json
+{
+  "message": "password reset; share securely and require user to change on next login",
+  "userId":   12,
+  "username": "alice",
+  "tempPassword": "abc123XYZdef456g"
+}
+```
+
+#### `POST /api/admin/users/:id/ban` · `POST /api/admin/users/:id/unban`
+Toggle `users.banned`. Refuses to ban yourself. Returns `409` if the user is already in the target state.
+
+#### `GET /api/admin/appointments?status=&limit=&offset=`
+All appointments system-wide, joined with patient/doctor/department names. `status` (if provided) must be one of `booked|checked_in|done|cancelled`.
+
+#### `GET /api/admin/records?limit=&offset=`
+All medical records (lightweight projection — no body fields).
+
+#### `GET /api/admin/stats`
+```json
+{
+  "usersByRole":          [{ "role": "patient", "count": 33 }, …],
+  "appointmentsByStatus": [{ "status": "booked", "count": 50 }, …],
+  "totalRecords":         37,
+  "totalDepartments":     6,
+  "bannedUsers":          0
+}
+```
+
+#### `GET /api/admin/audit-log?limit=&offset=`
+Recent audit entries, newest first.
 
 ---
 

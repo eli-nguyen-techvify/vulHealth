@@ -92,7 +92,7 @@ vulhealth/
 │   │       ├── messages.js
 │   │       ├── admin.js          (ping, backup, logs, import)
 │   │       └── upload.js
-│   ├── seed.sql                  (6 depts, 10 doctors, 20 patients, 30 records)
+│   ├── seed.sql                  (6 depts, 15 doctors, 33 patients, 37 records, 70 messages, 70 appts)
 │   ├── swagger.json              (OpenAPI 3.0 definition)
 │   ├── package.json
 │   └── Dockerfile
@@ -113,15 +113,7 @@ vulhealth/
 │   └── Dockerfile
 ├── docker-compose.yml
 ├── README.md                     (quick start)
-├── VULN_MAP.md                   (cheat sheet with 39 PoCs)
-└── repos/                        (this documentation folder)
-    ├── 00-overview.md
-    ├── 01-features.md
-    ├── 02-api-reference.md
-    ├── 03-data-model.md
-    ├── 04-roles-permissions.md
-    ├── 05-setup-guide.md
-    └── 06-security-notes.md
+└── VULN_MAP.md                   (cheat sheet with 39 PoCs)
 ```
 
 ## Domain glossary
@@ -138,11 +130,3 @@ vulhealth/
 | **Message**    | Free-text inbox communication between two users (usually patient ↔ doctor).              |
 | **Session**    | A JWT granted at login, used for API authentication.                                     |
 
-## Further reading
-
-- Functional requirements by role → [`01-features.md`](./01-features.md)
-- REST endpoints, request/response schemas → [`02-api-reference.md`](./02-api-reference.md)
-- Database schema and entity relationships → [`03-data-model.md`](./03-data-model.md)
-- Role-based access control matrix → [`04-roles-permissions.md`](./04-roles-permissions.md)
-- Installation / running / resetting → [`05-setup-guide.md`](./05-setup-guide.md)
-- Security posture and vulnerability catalog → [`06-security-notes.md`](./06-security-notes.md)

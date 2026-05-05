@@ -211,3 +211,170 @@ INSERT INTO messages (id, fromUserId, toUserId, subject, body) VALUES
   (3, 13, 3, 'Medication question',   'Can I take metformin with grapefruit juice?'),
   (4, 18, 8, 'Anxiety and heart',     'I had another episode last night. Scared.'),
   (5, 14, 4, 'Cream not working',     'The cream you gave made it worse actually.');
+
+-- ====== EXTRA SEED: more doctors, patients, appointments, records, messages ======
+
+-- Extra doctors (33-37)
+INSERT INTO users (id, username, email, passwordHash, role, fullName, phone, departmentId, bio) VALUES
+  (33, 'dr.kim',    'kim@vulhealth.local',    '5f4dcc3b5aa765d61d8327deb882cf99', 'doctor',
+       'Dr. Sarah Kim',    '+1-555-0211', 1,
+       'Cardiac electrophysiologist; arrhythmia ablation specialist. Stanford-trained, Mayo Clinic fellowship. Speaks English & Korean.'),
+  (34, 'dr.patel',  'patel@vulhealth.local',  '5f4dcc3b5aa765d61d8327deb882cf99', 'doctor',
+       'Dr. Raj Patel',    '+1-555-0212', 2,
+       'Endocrinologist focused on insulin resistance, PCOS, and metabolic syndrome. Multiple NEJM publications.'),
+  (35, 'dr.garcia', 'garcia@vulhealth.local', '5f4dcc3b5aa765d61d8327deb882cf99', 'doctor',
+       'Dr. Maria Garcia', '+1-555-0213', 5,
+       'Maternal-fetal medicine. High-risk pregnancy & NICU coordination. Twin pregnancy expert.'),
+  (36, 'dr.brown',  'brown@vulhealth.local',  '5f4dcc3b5aa765d61d8327deb882cf99', 'doctor',
+       'Dr. Michael Brown','+1-555-0214', 4,
+       'Pediatric infectious disease, vaccine research, immunization advocate. Travel medicine clinic lead.'),
+  (37, 'dr.wilson', 'wilson@vulhealth.local', '5f4dcc3b5aa765d61d8327deb882cf99', 'doctor',
+       'Dr. Lisa Wilson',  '+1-555-0215', 6,
+       'Interventional radiology — angiography, embolization, image-guided biopsy and tumor ablation.');
+
+-- Update existing doctor bios with richer detail
+UPDATE users SET bio = 'Internist specialising in diabetes management. Certified Diabetes Educator (CDE), runs the Thursday group education clinic.' WHERE id = 3;
+UPDATE users SET bio = 'Dermatology & cosmetic procedures. Mohs surgery certified for skin cancer removal. 12 years experience.' WHERE id = 4;
+UPDATE users SET bio = 'Pediatrician, loves treating kids. Special interest in childhood asthma, food allergies, ADHD coordination.' WHERE id = 5;
+UPDATE users SET bio = 'Obstetrician — high-risk pregnancy specialist. Delivered 2,500+ babies, twin & VBAC expert.' WHERE id = 6;
+UPDATE users SET bio = 'Diagnostic radiologist, CT & MRI. Subspecialty in neuroradiology, stroke imaging and brain tumor protocols.' WHERE id = 7;
+UPDATE users SET bio = 'Interventional cardiology. Performs cardiac catheterization, stenting, and TAVR procedures. Heart failure clinic.' WHERE id = 8;
+UPDATE users SET bio = 'Hypertension clinic. Resistant hypertension and renal artery disease focus. Salt restriction research.' WHERE id = 9;
+UPDATE users SET bio = 'Pediatric dermatology. Eczema, birthmark evaluation, infantile hemangioma laser therapy.' WHERE id = 10;
+
+-- Extra patients (38-50) — more variety in age & background
+INSERT INTO users (id, username, email, passwordHash, role, fullName, dob, phone) VALUES
+  (38, 'ursula',  'ursula@mail.com',  '5f4dcc3b5aa765d61d8327deb882cf99', 'patient', 'Ursula Adams',   '1990-04-15', '+1-555-1021'),
+  (39, 'victor',  'victor@mail.com',  '5f4dcc3b5aa765d61d8327deb882cf99', 'patient', 'Victor Chen',    '1982-11-23', '+1-555-1022'),
+  (40, 'wendy',   'wendy@mail.com',   '5f4dcc3b5aa765d61d8327deb882cf99', 'patient', 'Wendy Foster',   '1997-07-08', '+1-555-1023'),
+  (41, 'xavier',  'xavier@mail.com',  '5f4dcc3b5aa765d61d8327deb882cf99', 'patient', 'Xavier Reyes',   '1976-02-19', '+1-555-1024'),
+  (42, 'yara',    'yara@mail.com',    '5f4dcc3b5aa765d61d8327deb882cf99', 'patient', 'Yara Khalid',    '2003-08-30', '+1-555-1025'),
+  (43, 'zane',    'zane@mail.com',    '5f4dcc3b5aa765d61d8327deb882cf99', 'patient', 'Zane Mitchell',  '1994-12-11', '+1-555-1026'),
+  (44, 'amelia',  'amelia@mail.com',  '5f4dcc3b5aa765d61d8327deb882cf99', 'patient', 'Amelia Cooper',  '1988-05-26', '+1-555-1027'),
+  (45, 'brandon', 'brandon@mail.com', '5f4dcc3b5aa765d61d8327deb882cf99', 'patient', 'Brandon Hayes',  '1991-09-04', '+1-555-1028'),
+  (46, 'chloe',   'chloe@mail.com',   '5f4dcc3b5aa765d61d8327deb882cf99', 'patient', 'Chloe Bennett',  '2000-03-17', '+1-555-1029'),
+  (47, 'dmitri',  'dmitri@mail.com',  '5f4dcc3b5aa765d61d8327deb882cf99', 'patient', 'Dmitri Volkov',  '1984-10-09', '+1-555-1030'),
+  (48, 'elena',   'elena@mail.com',   '5f4dcc3b5aa765d61d8327deb882cf99', 'patient', 'Elena Ivanova',  '1996-06-22', '+1-555-1031'),
+  (49, 'felix',   'felix@mail.com',   '5f4dcc3b5aa765d61d8327deb882cf99', 'patient', 'Felix Wang',     '1973-01-05', '+1-555-1032'),
+  (50, 'gina',    'gina@mail.com',    '5f4dcc3b5aa765d61d8327deb882cf99', 'patient', 'Gina Rossi',     '1999-11-28', '+1-555-1033');
+
+-- Extra appointments (31-70)
+INSERT INTO appointments (id, patientId, doctorId, departmentId, scheduledAt, status, reason) VALUES
+  (31, 22, 33, 1, '2026-05-15 09:00', 'booked',     'Atrial flutter — ablation consult'),
+  (32, 23, 34, 2, '2026-05-15 10:00', 'booked',     'Insulin pump initiation'),
+  (33, 24, 35, 5, '2026-05-15 11:00', 'booked',     'Twin pregnancy first visit'),
+  (34, 25, 36, 4, '2026-05-15 13:00', 'booked',     'Recurrent ear infection'),
+  (35, 26, 37, 6, '2026-05-16 09:30', 'booked',     'Liver biopsy planning'),
+  (36, 38, 2,  1, '2026-05-16 10:30', 'booked',     'Family history of MI — risk assessment'),
+  (37, 39, 3,  2, '2026-05-16 11:30', 'done',       'Pre-employment physical'),
+  (38, 40, 4,  3, '2026-05-17 09:00', 'booked',     'Mole asymmetric, possibly atypical'),
+  (39, 41, 5,  4, '2026-05-17 10:00', 'cancelled',  'Child rescheduled — parent ill'),
+  (40, 42, 6,  5, '2026-05-17 11:00', 'booked',     'First prenatal visit'),
+  (41, 43, 7,  6, '2026-05-17 14:00', 'done',       'Chest CT screening (smoker)'),
+  (42, 44, 8,  1, '2026-05-18 09:00', 'booked',     'Echocardiogram for murmur'),
+  (43, 45, 9,  2, '2026-05-18 10:00', 'booked',     'GERD ongoing'),
+  (44, 46, 10, 3, '2026-05-18 11:00', 'checked_in', 'Severe acne — Accutane discussion'),
+  (45, 47, 11, 4, '2026-05-18 13:00', 'done',       'Toddler 18-month visit'),
+  (46, 48, 33, 1, '2026-05-19 09:00', 'booked',     'Holter monitor result review'),
+  (47, 49, 34, 2, '2026-05-19 10:00', 'booked',     'Thyroid nodule biopsy'),
+  (48, 50, 35, 5, '2026-05-19 11:00', 'booked',     'Postpartum 6-week follow-up'),
+  (49, 38, 36, 4, '2026-05-20 09:00', 'booked',     'Travel vaccinations for Vietnam trip'),
+  (50, 39, 37, 6, '2026-05-20 10:00', 'booked',     'MRI shoulder rotator cuff'),
+  (51, 12, 8,  1, '2026-05-21 09:30', 'booked',     'Stress echo'),
+  (52, 13, 4,  3, '2026-05-21 10:30', 'booked',     'Skin tag removal'),
+  (53, 14, 5,  4, '2026-05-21 11:30', 'booked',     'Niece visit — well child'),
+  (54, 15, 6,  5, '2026-05-22 09:00', 'cancelled',  'Pt declined — partner ill'),
+  (55, 16, 7,  6, '2026-05-22 10:00', 'booked',     'Ultrasound thyroid'),
+  (56, 17, 33, 1, '2026-05-22 11:00', 'booked',     'PVC palpitations'),
+  (57, 18, 34, 2, '2026-05-23 09:00', 'booked',     'Hashimoto follow-up'),
+  (58, 19, 35, 5, '2026-05-23 10:00', 'done',       'Pap smear'),
+  (59, 20, 36, 4, '2026-05-23 11:00', 'booked',     'Asthma action plan'),
+  (60, 21, 37, 6, '2026-05-23 14:00', 'booked',     'Embolization consult — uterine fibroid'),
+  (61, 40, 2,  1, '2026-05-24 09:00', 'booked',     'Annual cardiac checkup'),
+  (62, 41, 3,  2, '2026-05-24 10:00', 'done',       'Vitamin D deficiency follow-up'),
+  (63, 42, 4,  3, '2026-05-25 09:00', 'booked',     'Hair loss workup'),
+  (64, 43, 5,  4, '2026-05-25 10:00', 'booked',     'School physical'),
+  (65, 44, 6,  5, '2026-05-25 11:00', 'booked',     'Anatomy scan week 20'),
+  (66, 45, 7,  6, '2026-05-26 09:00', 'booked',     'Lumbar MRI back pain'),
+  (67, 46, 8,  1, '2026-05-26 10:00', 'booked',     'Heart palpitations young adult'),
+  (68, 47, 9,  2, '2026-05-26 11:00', 'done',       'Annual physical'),
+  (69, 48, 10, 3, '2026-05-27 09:00', 'booked',     'Eczema flare'),
+  (70, 49, 11, 4, '2026-05-27 10:00', 'booked',     'Newborn jaundice review');
+
+-- Extra medical records for the ''done'' / ''checked_in'' new appointments
+INSERT INTO medical_records (id, patientId, doctorId, appointmentId, diagnosis, prescription, notes) VALUES
+  (31, 39, 3,  37, 'Healthy adult, employment cleared',  'None',                                 'BMI 24, BP 118/76. Cleared for full duty.'),
+  (32, 43, 7,  41, 'Lung nodule 4mm right upper lobe',   'Repeat CT in 6 months',                'Patient 15 pack-year smoker. Lung-RADS 2. Smoking cessation counseling provided.'),
+  (33, 47, 11, 45, 'Toddler well visit',                 'Continue multivitamins',               'Vaccinations updated. Mild speech delay flagged — refer SLP.'),
+  (34, 19, 35, 58, 'Pap smear ASCUS',                    'HPV co-test, repeat in 6 months',      'Patient denies risk factors. Smoking 1 ppd — counseled.'),
+  (35, 41, 3,  62, 'Vitamin D 22 ng/mL — insufficient',  'Vitamin D3 2000 IU daily',             'Recheck in 3 months. Outdoor activity encouraged.'),
+  (36, 47, 9,  68, 'Mild hyperlipidemia',                'Lifestyle changes; recheck 3 months',  'LDL 142, HDL 52. Family hx CAD father age 58.'),
+  (37, 46, 10, 44, 'Severe nodulocystic acne',           'iPLEDGE enrolment for isotretinoin',    'Discussed teratogenicity, mood monitoring, lipid baseline. Patient using 2 contraception methods.');
+
+-- ====== Extra Messages: longer multi-turn conversations (HTML-bodied for XSS sink demo) ======
+INSERT INTO messages (id, fromUserId, toUserId, subject, body) VALUES
+  (6,  3,  13, 'Re: Medication question',         'Generally fine, but avoid grapefruit when on new BP meds. Stick with water/coffee around metformin.'),
+  (7,  13, 3,  'Re: Re: Medication question',     'Got it, thanks. One more — better with food or empty stomach?'),
+  (8,  3,  13, 'Take with food',                  '<p>Take with the largest meal of the day to reduce GI side effects. Avoid alcohol.</p>'),
+  (9,  8,  18, 'Re: Anxiety and heart',           '<p>Sorry to hear that. Please come in tomorrow — I''ve held a 2pm slot. We''ll do an event monitor.</p>'),
+  (10, 18, 8,  'Confirmed',                       'Thank you doctor, I''ll be there at 2.'),
+  (11, 4,  14, 'Re: Cream not working',           'Stop the cream immediately. Apply petroleum jelly only and book a visit. Could be steroid sensitivity.'),
+  (12, 14, 4,  'Booked',                          'Booked for tomorrow 9am. Should I bring the tube of cream?'),
+  (13, 4,  14, 'Bring it',                        'Yes please, I want to verify the formulation.'),
+  (14, 16, 6,  'Movement check',                  'Doctor, baby has been less active today. Should I worry?'),
+  (15, 6,  16, 'Kick counts',                     '<p>Lie on your left side after a meal and count kicks for 1 hour. <strong>Less than 10 kicks = come to L&D immediately.</strong></p>'),
+  (16, 16, 6,  'Update',                          'Counted 14 kicks in 30 min, feeling better. Thank you!'),
+  (17, 19, 9,  'BP reading',                      'Home BP 152/94 this morning. Took medication on time.'),
+  (18, 9,  19, 'Adjust meds',                     'Add HCTZ 12.5mg in the morning. Recheck in 1 week. Avoid NSAIDs.'),
+  (19, 20, 10, 'Acne update',                     'Skin getting drier with tretinoin. Is that normal?'),
+  (20, 10, 20, 'Yes — moisturize',                'Yes, normal. Use a gentle moisturizer 30 min after applying tretinoin. SPF 30+ daily is mandatory.'),
+  (21, 22, 2,  'AFib worried',                    'Felt fluttering for 2 hours last night. Should I take extra apixaban?'),
+  (22, 2,  22, 'Do not double dose',              '<p><strong>Never double-dose apixaban.</strong> If symptoms persist >30 min or chest pain develops, ER immediately. Otherwise come tomorrow morning.</p>'),
+  (23, 27, 7,  'MRI claustrophobia',              'I''m nervous about the closed MRI. Can we do open?'),
+  (24, 7,  27, 'Open MRI option',                 'Yes — I''ll change the order to open MRI. Lower resolution but adequate for knee. Reception will reschedule.'),
+  (25, 38, 2,  'Family history',                  'My father had a heart attack at 48. Should I be screened earlier than 40?'),
+  (26, 2,  38, 'Yes — early screening',           '<p>Given premature CAD in first-degree relative, we recommend lipid panel + coronary calcium score now. Booking you in.</p>'),
+  (27, 42, 6,  'First pregnancy',                 'I just got a positive test! What should I do first?'),
+  (28, 6,  42, 'Welcome',                         '<p>Congratulations! Start prenatal vitamins (folic acid 400mcg minimum), avoid alcohol/raw fish, and book in 1-2 weeks for dating ultrasound.</p>'),
+  (29, 44, 8,  'Murmur on exam',                  'Last visit you said I have a murmur. Is that dangerous?'),
+  (30, 8,  44, 'Likely benign',                   'Most adult murmurs are benign flow murmurs. We''ll confirm with echo on the 18th.'),
+  (31, 46, 10, 'Accutane scary',                  'I read about side effects. Honestly afraid to start.'),
+  (32, 10, 46, 'Risks vs benefits',               '<p>Valid concern. We''ll do baseline labs, monthly checks, and you must use 2 forms of contraception. Most patients tolerate it well — let''s discuss in clinic.</p>'),
+  (33, 33, 32, 'Schedule change',                 'Receptionist — please block my Friday afternoon for ablation prep next week.'),
+  (34, 32, 33, 'Done',                            'Confirmed. Friday 1-5pm blocked, no new bookings.'),
+  (35, 1,  32, 'New doctor onboarding',           'Dr. Kim, Patel, Garcia, Brown, Wilson are all set up. Please verify their access tomorrow.'),
+  (36, 32, 1,  'Verified',                        'All 5 logged in successfully. Dr. Wilson''s schedule needs templates — will follow up.'),
+  (37, 12, 2,  'Lab results question',            'I got the email about my labs. What does ''mild ST depression'' mean exactly?'),
+  (38, 2,  12, 'ST depression explained',         '<p>It can indicate the heart not getting enough blood during stress. We''ll do a stress echo on the 21st.</p>'),
+  (39, 50, 35, 'Postpartum bleeding',             'Still bleeding lightly at week 5. Normal?'),
+  (40, 35, 50, 'Lochia normal',                   'Light bleeding/spotting up to 6 weeks is normal. Heavy soaking pads or large clots = call us immediately.'),
+  (41, 17, 5,  'Child fever back',                'Fever 38.5 again today. He had paracetamol 6 hours ago.'),
+  (42, 5,  17, 'Bring him in',                    '<p>Please bring him in this afternoon — we have a 3pm slot. Ear infection might have returned.</p>'),
+  (43, 11, 1,  'Password change required',        'I keep forgetting to change my default password. How do I do it?'),
+  (44, 1,  11, 'Change pw immediately',           '<p><strong>Critical:</strong> Profile → Security → Change Password. Default passwords are an audit finding. Please do this today.</p>'),
+  (45, 28, 8,  'Post-MI side effect',             'Atorvastatin gives me muscle pain. Can we switch?'),
+  (46, 8,  28, 'Switch to rosuvastatin',          '<p>Yes — switch to rosuvastatin 10mg. Check CK level if pain persists. Stop immediately if dark urine.</p>'),
+  (47, 29, 9,  'Levothyroxine timing',            'Should I take it before breakfast or before bed?'),
+  (48, 9,  29, 'Morning empty stomach',           'Take it 30-60 min before breakfast, on an empty stomach. No coffee or calcium for 1 hour after.'),
+  (49, 32, 1,  'Daily reception summary',         'Today: 18 check-ins, 2 walk-ins, 1 ER referral. All EHR notes completed except Dr. Weak (5 pending).'),
+  (50, 1,  11, 'Pending notes reminder',          'Dr. Weak — please complete your 5 pending EHR notes before end of week. Compliance required.'),
+  (51, 38, 33, 'Holter request',                  'Hi Dr. Kim, can we set up a 48-hour Holter? My Apple Watch logs random spikes overnight.'),
+  (52, 33, 38, 'Holter ordered',                  '<p>Ordered for next Tuesday — front desk will email instructions. Please bring the watch readings as a PDF.</p>'),
+  (53, 23, 34, 'Pump anxiety',                    'I''m worried about the insulin pump — what if it malfunctions overnight?'),
+  (54, 34, 23, 'Pump safety',                     '<p>Modern pumps suspend automatically if glucose drops. We''ll train you for 2 sessions before go-live. Backup pens always in your bag.</p>'),
+  (55, 24, 35, 'Twin appetite',                   'I''m starving constantly! Is that normal at week 12 with twins?'),
+  (56, 35, 24, 'Twin nutrition',                  '<p>Yes — caloric needs are ~600/day above baseline for twins. Focus on protein, iron, and folate. Small frequent meals help.</p>'),
+  (57, 25, 36, 'Recurring ear infection',         'This is the third one this winter. Should we see ENT?'),
+  (58, 36, 25, 'ENT referral',                    'Agreed. Three episodes in 6 months meets criteria for tube evaluation. Sending the referral today.'),
+  (59, 26, 37, 'Liver biopsy nervous',            'How painful is the biopsy? Will I be awake?'),
+  (60, 37, 26, 'Biopsy info',                     '<p>Done with local anesthetic + light sedation. You''ll be drowsy but responsive. Procedure takes 15 min, recovery 4 hours observation.</p>'),
+  (61, 12, 32, 'Reschedule needed',               'Hi reception, can we move my May 21 stress echo? Work conflict.'),
+  (62, 32, 12, 'Rescheduled',                     'Moved to May 28 9:30am. Confirmation email sent.'),
+  (63, 45, 9,  'Reflux at night',                 'GERD wakes me up every night around 3am. PPI not helping.'),
+  (64, 9,  45, 'Plan',                            '<p>Add bedtime ranitidine, raise head of bed 6 inches, no food 3 hours before sleep. If no improvement in 2 weeks, scoping.</p>'),
+  (65, 13, 7,  'CT contrast allergy',             'I''m allergic to shellfish. Will the CT contrast be OK?'),
+  (66, 7,  13, 'Contrast safe',                   'Shellfish allergy is unrelated to iodine contrast (old myth). We''ll still pre-medicate with steroids if you''re anxious.'),
+  (67, 1,  3,  'Audit reminder',                  'Dr. Jones — your medical records have 2 unsigned notes. Please sign before Friday audit.'),
+  (68, 3,  1,  'Will sign',                       'Both signed off this morning. Apologies for the delay — vacation last week.'),
+  (69, 32, 38, 'Welcome packet',                  '<p>Welcome to VulHealth! Please complete intake forms via the patient portal before your visit. <a href="/portal">Click here</a></p>'),
+  (70, 38, 32, 'Forms complete',                  'All 4 forms submitted. See you Saturday.');

@@ -63,6 +63,19 @@ router.get('/:id', requireAuth, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// Update appointment status (used when doctor finishes a visit and writes the record)
+router.patch('/:id/status', requireAuth, async (req, res, next) => {
+  try {
+    const { status } = req.body || {};
+    const allowed = ['booked', 'checked_in', 'done', 'cancelled'];
+    if (!allowed.includes(status)) {
+      return res.status(400).json({ error: 'invalid status' });
+    }
+    await run('UPDATE appointments SET status = ? WHERE id = ?', [status, req.params.id]);
+    res.json({ message: 'updated', status });
+  } catch (e) { next(e); }
+});
+
 router.delete('/:id', requireAuth, async (req, res, next) => {
   try {
     // VULN A01: doesn't validate ownership

@@ -1,0 +1,63 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "VulHealth API",
+    "version": "1.0.0",
+    "description": "Hospital management API — DELIBERATELY vulnerable for pentest training."
+  },
+  "servers": [{ "url": "http://localhost:3001" }],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
+    }
+  },
+  "paths": {
+    "/api/auth/login": {
+      "post": {
+        "summary": "User login",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "username": {"type":"string"}, "password": {"type":"string"} } } } }
+        },
+        "responses": { "200": { "description": "Returns JWT" } }
+      }
+    },
+    "/api/auth/register": {
+      "post": { "summary": "Patient self-registration" }
+    },
+    "/api/auth/forgot-password": {
+      "post": { "summary": "Request reset token" }
+    },
+    "/api/doctors": {
+      "get": { "summary": "Search doctors", "parameters": [{"name":"q","in":"query"},{"name":"departmentId","in":"query"}] }
+    },
+    "/api/doctors/{id}": {
+      "get": { "summary": "Doctor detail", "parameters": [{"name":"id","in":"path","required":true}] }
+    },
+    "/api/departments": { "get": { "summary": "List departments" } },
+    "/api/appointments": {
+      "post": { "summary": "Book appointment", "security": [{"bearerAuth": []}] }
+    },
+    "/api/appointments/{id}": {
+      "get": { "summary": "Appointment detail", "security": [{"bearerAuth": []}], "parameters": [{"name":"id","in":"path","required":true}] }
+    },
+    "/api/records/mine": { "get": { "summary": "My medical records", "security": [{"bearerAuth": []}] } },
+    "/api/records/{id}": {
+      "get": { "summary": "Get medical record by id", "security": [{"bearerAuth": []}], "parameters": [{"name":"id","in":"path","required":true}] }
+    },
+    "/api/users/me": {
+      "get": { "summary": "Current user", "security": [{"bearerAuth": []}] },
+      "put": { "summary": "Update profile", "security": [{"bearerAuth": []}] }
+    },
+    "/api/users/me/avatar-from-url": {
+      "post": { "summary": "Import avatar from URL", "security": [{"bearerAuth": []}] }
+    },
+    "/api/messages": { "post": { "summary": "Send message", "security": [{"bearerAuth": []}] } },
+    "/api/messages/inbox": { "get": { "summary": "Inbox", "security": [{"bearerAuth": []}] } },
+    "/api/admin/users": { "get": { "summary": "List all users", "security": [{"bearerAuth": []}] } },
+    "/api/admin/ping": { "post": { "summary": "Diagnostic ping", "security": [{"bearerAuth": []}] } },
+    "/api/admin/logs": { "get": { "summary": "Read server logs", "security": [{"bearerAuth": []}] } },
+    "/api/upload/avatar": { "post": { "summary": "Upload avatar", "security": [{"bearerAuth": []}] } },
+    "/api/redirect": { "get": { "summary": "Redirect helper", "parameters": [{"name":"url","in":"query"}] } }
+  }
+}

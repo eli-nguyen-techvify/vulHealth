@@ -131,12 +131,29 @@ cd ../shannon
 
 3. Watch the progress: Shannon logs session IDs; reports land in `shannon/audit-logs/<sessionId>/`.
 
-The preconfigured `shannon/configs/vulhealth.yaml` already contains:
+The preconfigured `shannon/configs/vulhealth.yaml` runs as a single persona (`alice` / patient).
 
-- Target URL (`http://host.docker.internal:4000`)
-- Login URL & form flow (fills `alice` / `password`)
-- Success condition (cookie set OR URL changes after submit)
-- Secondary credentials for `dr.smith` and `admin` so Shannon can test privilege boundaries
+### Multi-persona run (cross-role IDOR + privilege escalation)
+
+VulHealth has 4 roles (Patient, Doctor, Receptionist, Admin) with distinct privileges — perfect for multi-persona testing. Convert `authentication.credentials` into `personas[]`:
+
+```yaml
+authentication:
+  login_type: form
+  login_url: http://host.docker.internal:4000/login
+  login_flow:
+    - "Navigate to /login"
+    - "Fill the username field with $username"
+    - "Fill the password field with $password"
+    - "Click 'Sign in'"
+  success_condition: { type: url_contains, value: "/" }
+  personas:
+    - { name: alice,    role: patient,      credentials: { username: alice,    password: password } }
+    - { name: dr_smith, role: doctor,       credentials: { username: dr.smith, password: smith2024 } }
+    - { name: admin,    role: administrator, credentials: { username: admin,   password: admin123 } }
+```
+
+Discovery runs once; auth-mapper + every vuln/exploit pair runs three times in parallel (one per persona); the authz exploit agent reads all three token bundles so it can demonstrate alice → admin data access cross-role.
 
 See [`06-security-notes.md`](./06-security-notes.md) for expected findings.
 

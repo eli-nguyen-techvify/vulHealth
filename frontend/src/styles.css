@@ -1,7 +1,6 @@
 /* ============================================================
    VulHealth — Atlantis-inspired minimal theme
    Clean white, navy text, indigo CTA, soft blue blobs.
-   Purely cosmetic — no vuln behavior changes.
    ============================================================ */
 
 :root {
@@ -410,6 +409,113 @@ pre {
   border: 1px solid var(--border-soft);
 }
 
+/* ----------- Modal / Popup ----------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(14, 19, 40, 0.55);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+  animation: fadeIn 0.15s ease-out;
+}
+.modal {
+  background: var(--white);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(14, 19, 40, 0.25);
+  max-width: 560px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.2s ease-out;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 28px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.modal-header h3 { margin: 0; font-size: 18px; }
+.modal-close {
+  background: transparent;
+  color: var(--ink-mute);
+  font-size: 22px;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-close:hover { background: var(--off); color: var(--ink); }
+.modal-body  { padding: 22px 28px; }
+.modal-footer {
+  padding: 16px 28px;
+  border-top: 1px solid var(--border-soft);
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 12px 18px;
+  font-size: 14px;
+}
+.detail-grid dt { color: var(--ink-mute); font-size: 13px; padding-top: 2px; }
+.detail-grid dd { margin: 0; color: var(--ink); }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ----------- Profile layout (shared by /profile and /doctors/:id) ----------- */
+.profile-header {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+.profile-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: var(--blob);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--primary-d);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.profile-meta h2 { margin: 0 0 6px; }
+.profile-meta .handle { color: var(--ink-mute); font-size: 14px; }
+.profile-meta .role-pill {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary-d);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.profile-section h3 {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-mute);
+  margin-bottom: 14px;
+}
+.profile-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
 /* ----------- FAQ accordion ----------- */
 details {
   background: var(--white);
@@ -499,6 +605,84 @@ details .answer { margin-top: 14px; color: var(--ink-soft); font-size: 14px; lin
 .search-hero input:focus { border: none; box-shadow: none; }
 .search-hero button { flex-shrink: 0; padding: 10px 22px; }
 
+/* ----------- Doctor dashboard ----------- */
+.dash-welcome {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+.dash-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.stat-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+  box-shadow: 0 1px 2px rgba(14, 19, 40, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+.stat-card.accent-indigo { border-top: 3px solid var(--primary); }
+.stat-card.accent-amber  { border-top: 3px solid var(--accent-amber); }
+.stat-card.accent-teal   { border-top: 3px solid var(--accent-teal); }
+.stat-card.accent-pink   { border-top: 3px solid var(--accent-pink); }
+.stat-card .stat-num {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.stat-card .stat-lbl {
+  font-size: 12px;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 8px;
+  font-weight: 600;
+}
+.stat-card .stat-sub { font-size: 12px; color: var(--ink-soft); margin-top: 4px; }
+@media (max-width: 800px) { .dash-stats { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .dash-stats { grid-template-columns: 1fr; } }
+
+.dash-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+.dash-section-head h3 { margin: 0; }
+.dash-section-head a  { font-size: 13px; }
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--ink-mute);
+  font-size: 14px;
+}
+
+/* Role tag pills (admin dashboard "users by role") */
+.role-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--off);
+  color: var(--ink);
+}
+.role-tag.role-admin        { background: #fef2f2; color: #991b1b; }
+.role-tag.role-doctor       { background: var(--primary-soft); color: var(--primary-d); }
+.role-tag.role-patient      { background: #ecfdf5; color: #065f46; }
+.role-tag.role-receptionist { background: #fef3c7; color: #92400e; }
+
 /* ----------- Dashboard 2-col layout ----------- */
 .split-2 {
   display: grid;
@@ -506,6 +690,150 @@ details .answer { margin-top: 14px; color: var(--ink-soft); font-size: 14px; lin
   gap: 20px;
 }
 @media (max-width: 900px) { .split-2 { grid-template-columns: 1fr; } }
+
+/* ----------- Admin shell (sidebar layout) ----------- */
+.admin-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--off);
+}
+.admin-sidebar {
+  width: 240px;
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: width 0.2s ease;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.admin-shell.collapsed .admin-sidebar { width: 64px; }
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.admin-shell.collapsed .admin-brand { padding: 18px 12px; justify-content: center; }
+.admin-shell.collapsed .admin-brand .brand-text { display: none; }
+.admin-brand .hamburger {
+  background: transparent;
+  color: var(--ink);
+  border: none;
+  padding: 4px 10px;
+  font-size: 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  line-height: 1;
+}
+.admin-brand .hamburger:hover { background: var(--off); }
+
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 14px 10px;
+  gap: 2px;
+  flex: 1;
+}
+.admin-nav a {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: var(--ink-soft);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.12s, color 0.12s;
+}
+.admin-nav a:hover { background: var(--off); color: var(--ink); }
+.admin-nav a.active { background: var(--primary-soft); color: var(--primary-d); }
+.admin-nav a .icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-right: 12px;
+  font-weight: 700;
+  font-size: 12px;
+  background: var(--off);
+  color: var(--ink);
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.admin-nav a.active .icon { background: var(--primary); color: var(--white); }
+.admin-shell.collapsed .admin-nav a { justify-content: center; padding: 10px; }
+.admin-shell.collapsed .admin-nav a .icon { margin-right: 0; }
+.admin-shell.collapsed .admin-nav a .label { display: none; }
+
+.admin-foot {
+  padding: 14px 16px 18px;
+  border-top: 1px solid var(--border-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.admin-foot .admin-user { font-size: 13px; color: var(--ink-soft); line-height: 1.4; }
+.admin-foot .back-link { font-size: 13px; color: var(--ink-soft); padding: 4px 0; }
+.admin-foot button { padding: 8px 16px; font-size: 13px; }
+.admin-shell.collapsed .admin-foot .admin-user,
+.admin-shell.collapsed .admin-foot .back-link { display: none; }
+.admin-shell.collapsed .admin-foot { padding: 12px 8px; }
+.admin-shell.collapsed .admin-foot button { padding: 8px 4px; font-size: 12px; }
+
+.admin-main {
+  flex: 1;
+  padding: 36px 44px;
+  overflow-x: auto;
+  min-width: 0;
+}
+.admin-main h2 { margin-bottom: 8px; }
+.admin-main > p { margin-bottom: 24px; }
+
+/* admin dashboard tiles */
+.admin-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+.admin-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+  text-decoration: none;
+  color: var(--ink);
+  transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
+}
+.admin-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(14, 19, 40, 0.06);
+  border-color: var(--primary);
+  text-decoration: none;
+}
+.admin-card h3 { margin: 0 0 6px; font-size: 16px; }
+.admin-card p  { margin: 0; font-size: 13px; color: var(--ink-soft); }
+
+@media (max-width: 700px) {
+  .admin-shell { flex-direction: column; }
+  .admin-sidebar { width: 100% !important; height: auto; position: static; border-right: none; border-bottom: 1px solid var(--border); }
+  .admin-shell.collapsed .admin-nav,
+  .admin-shell.collapsed .admin-foot { display: none; }
+  .admin-main { padding: 24px 20px; }
+}
 
 /* ----------- Accent doodles (small sparkle/dot dots on sections) ----------- */
 .sprinkle { position: relative; }

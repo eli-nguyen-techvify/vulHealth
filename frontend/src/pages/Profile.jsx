@@ -6,7 +6,7 @@ export default function Profile() {
   const [err, setErr] = useState(''); const [ok, setOk] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [passwordNew, setPasswordNew] = useState('');
-  const [ssrfResult, setSsrfResult] = useState(null);
+  const [fetchResult, setSsrfResult] = useState(null);
 
   useEffect(() => {
     api.get('/users/me').then(r => setMe(r.data)).catch(e => setErr(e.response?.data?.error || e.message));
@@ -67,8 +67,8 @@ export default function Profile() {
           <label><span>Email</span><input value={me.email||''} onChange={upd('email')} /></label>
           <label><span>Full name</span><input value={me.fullName||''} onChange={upd('fullName')} /></label>
           <label><span>Phone</span><input value={me.phone||''} onChange={upd('phone')} /></label>
-          <label><span>Bio (HTML)</span><textarea value={me.bio||''} onChange={upd('bio')} /></label>
-          <label><small>Role (read-only in UI — but editable via API 😈): {me.role}</small></label>
+          <label><span>Bio</span><textarea value={me.bio||''} onChange={upd('bio')} /></label>
+          <label><small>Role: {me.role}</small></label>
           <button>Save</button>
         </form>
       </div>
@@ -81,14 +81,13 @@ export default function Profile() {
         <h4>Or fetch from URL</h4>
         <input value={avatarUrl} onChange={e => setAvatarUrl(e.target.value)} placeholder="https://example.com/pic.jpg" />
         <button onClick={fetchAvatar} style={{marginTop:8}}>Fetch</button>
-        {ssrfResult && (
-          <pre>{JSON.stringify(ssrfResult, null, 2)}</pre>
+        {fetchResult && (
+          <pre>{JSON.stringify(fetchResult, null, 2)}</pre>
         )}
       </div>
 
       <div className="card">
         <h3>Change Password</h3>
-        <p><small>No current-password verification required 🙃</small></p>
         <input type="password" value={passwordNew} onChange={e => setPasswordNew(e.target.value)} placeholder="new password" />
         <button onClick={changePassword} style={{marginTop:8}}>Change</button>
       </div>

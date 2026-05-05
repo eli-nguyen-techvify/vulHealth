@@ -9,8 +9,7 @@ Project documentation index. Start with `00-overview.md`, then follow the number
 | 2 | [`02-api-reference.md`](./02-api-reference.md)   | REST endpoint table + request/response schemas for every route                                    |
 | 3 | [`03-data-model.md`](./03-data-model.md)         | SQLite schema, ER diagram, table definitions, seed counts                                         |
 | 4 | [`04-roles-permissions.md`](./04-roles-permissions.md) | Intended RBAC matrix + how middleware enforces (or fails to enforce) it                   |
-| 5 | [`05-setup-guide.md`](./05-setup-guide.md)       | How to install, run, reset, run Shannon against it, troubleshoot                                  |
-| 6 | [`06-security-notes.md`](./06-security-notes.md) | Threat model, catalogue of intentional weaknesses, suggested remediations                         |
+| 5 | [`05-setup-guide.md`](./05-setup-guide.md)       | How to install, run, reset, run Shannon against it, troubleshoot                                  |                      |
 
 ## Related files outside this folder
 

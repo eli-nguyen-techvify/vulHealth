@@ -41,7 +41,7 @@ export default function Messages() {
         <form onSubmit={send}>
           <label><span>To (user id)</span><input value={toUserId} onChange={e=>setToUserId(e.target.value)} required /></label>
           <label><span>Subject</span><input value={subject} onChange={e=>setSubject(e.target.value)} /></label>
-          <label><span>Body (HTML allowed 😈)</span><textarea value={body} onChange={e=>setBody(e.target.value)} required /></label>
+          <label><span>Body</span><textarea value={body} onChange={e=>setBody(e.target.value)} required /></label>
           {err && <div className="error">{err}</div>}
           {ok  && <div className="ok">{ok}</div>}
           <button>Send</button>
@@ -59,7 +59,6 @@ export default function Messages() {
             <button className="secondary" onClick={() => setSelected(null)}>← Back</button>
             <h4>{selected.subject || '(no subject)'}</h4>
             <p><small>From: {selected.fromName || selected.fromUsername} · {selected.createdAt}</small></p>
-            {/* VULN stored XSS: message body rendered as HTML */}
             <div dangerouslySetInnerHTML={{ __html: selected.body }} />
           </div>
         ) : (

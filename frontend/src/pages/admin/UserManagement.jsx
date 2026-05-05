@@ -26,11 +26,11 @@ export default function UserManagement() {
       {err && <div className="error">{err}</div>}
       {ok  && <div className="ok">{ok}</div>}
       <table>
-        <thead><tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th><th>Password hash</th><th></th></tr></thead>
+        <thead><tr><th>ID</th><th>Username</th><th>Full name</th><th>Email</th><th>Role</th><th>Password hash</th><th></th></tr></thead>
         <tbody>
           {users.map(u => (
             <tr key={u.id}>
-              <td>{u.id}</td><td>{u.username}</td><td>{u.email}</td><td>{u.role}</td>
+              <td>{u.id}</td><td>{u.username}</td><td>{u.fullName || '—'}</td><td>{u.email}</td><td>{u.role}</td>
               <td><code style={{fontSize:11}}>{u.passwordHash}</code></td>
               <td><button className="secondary" onClick={() => setEditing(u)}>Edit</button></td>
             </tr>

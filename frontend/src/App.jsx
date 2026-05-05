@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { currentUser } from './api';
 import Navbar from './components/Navbar';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
@@ -17,6 +18,7 @@ import Search from './pages/Search';
 import DoctorDashboard from './pages/doctor/DoctorDashboard';
 import PatientRecords from './pages/doctor/PatientRecords';
 import WriteRecord from './pages/doctor/WriteRecord';
+import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UserManagement from './pages/admin/UserManagement';
 import Diagnostics from './pages/admin/Diagnostics';
@@ -24,18 +26,33 @@ import ImportXml from './pages/admin/ImportXml';
 
 function Layout({ children }) {
   const loc = useLocation();
-  const fullBleed = loc.pathname === '/';   // only Landing wants full-bleed hero
+  const isAdmin = loc.pathname.startsWith('/admin');
+  const fullBleed = loc.pathname === '/' || isAdmin; // Landing + admin handle their own width
   if (fullBleed) return children;
   return <div className="container">{children}</div>;
+}
+
+function ConditionalNavbar() {
+  const loc = useLocation();
+  if (loc.pathname.startsWith('/admin')) return null;
+  return <Navbar />;
+}
+
+function HomeRoute() {
+  const user = currentUser();
+  if (user?.role === 'admin')        return <Navigate to="/admin" replace />;
+  if (user?.role === 'doctor')       return <Navigate to="/doctor" replace />;
+  if (user?.role === 'receptionist') return <Navigate to="/appointments" replace />;
+  return <Landing />;
 }
 
 export default function App() {
   return (
     <>
-      <Navbar />
+      <ConditionalNavbar />
       <Layout>
         <Routes>
-          <Route path="/" element={<Landing />} />
+          <Route path="/" element={<HomeRoute />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -51,10 +68,12 @@ export default function App() {
           <Route path="/doctor" element={<DoctorDashboard />} />
           <Route path="/doctor/patients" element={<PatientRecords />} />
           <Route path="/doctor/write-record" element={<WriteRecord />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/users" element={<UserManagement />} />
-          <Route path="/admin/diagnostics" element={<Diagnostics />} />
-          <Route path="/admin/import" element={<ImportXml />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="users" element={<UserManagement />} />
+            <Route path="diagnostics" element={<Diagnostics />} />
+            <Route path="import" element={<ImportXml />} />
+          </Route>
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Layout>

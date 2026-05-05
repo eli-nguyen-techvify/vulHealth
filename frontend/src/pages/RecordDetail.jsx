@@ -1,15 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import api from '../api';
+import { Link, useParams } from 'react-router-dom';
+import api, { currentUser } from '../api';
 
 export default function RecordDetail() {
   const { id } = useParams();
   const [r, setR] = useState(null);
   const [err, setErr] = useState('');
+  const user = currentUser();
 
   useEffect(() => {
+    if (!user) return;
     api.get(`/records/${id}`).then(res => setR(res.data)).catch(e => setErr(e.response?.data?.error || e.message));
-  }, [id]);
+  }, [id, user]);
+
+  if (!user) {
+    return (
+      <div className="card">
+        <h2>Medical Record #{id}</h2>
+        <p>Bạn cần <Link to="/login">đăng nhập</Link> để xem chi tiết hồ sơ bệnh án.</p>
+      </div>
+    );
+  }
 
   if (err) return <div className="error">{err}</div>;
   if (!r) return <p>Loading…</p>;
@@ -22,7 +33,6 @@ export default function RecordDetail() {
       <p><strong>Created:</strong> {r.createdAt}</p>
       <hr />
       <h3>Diagnosis</h3>
-      {/* VULN: stored XSS — notes/diagnosis rendered as HTML */}
       <div dangerouslySetInnerHTML={{ __html: r.diagnosis || '—' }} />
       <h3>Prescription</h3>
       <div dangerouslySetInnerHTML={{ __html: r.prescription || '—' }} />

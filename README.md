@@ -41,16 +41,28 @@ First startup will seed `backend/data/vulhealth.db` (6 departments, 10 doctors, 
 
 ## Running Shannon against it
 
-Assuming you built Shannon (see `../shannon/`), from the shannon dir:
+Assuming you built Shannon (see `../shannon/`):
 
-```bash
-./shannon start \
-    URL=http://host.docker.internal:4000 \
-    REPO=dummy \
-    CONFIG=./configs/vulhealth.yaml
-```
+1. Make the VulHealth docs available to Shannon as the target's documentation folder. From the repo root:
 
-A preconfigured `vulhealth.yaml` is dropped under `shannon/configs/` when you run the provided helper, or copy it manually from [shannon/configs/vulhealth.yaml](../shannon/configs/vulhealth.yaml).
+   ```bash
+   ln -s "$(pwd)/vulhealth/repos" "$(pwd)/shannon/repos/vulhealth"
+   ```
+   (or `cp -r vulhealth/repos shannon/repos/vulhealth` if you prefer a copy)
+
+2. Start the run from the shannon dir:
+
+   ```bash
+   cd ../shannon
+   ./shannon start \
+       URL=http://host.docker.internal:4000 \
+       REPO=vulhealth \
+       CONFIG=./configs/vulhealth.yaml
+   ```
+
+`shannon/configs/vulhealth.yaml` is preconfigured for **multi-persona testing** — all four roles (patient `alice`, doctor `dr.smith`, receptionist `reception`, admin `admin`) run in parallel so the authz exploit phase can demonstrate cross-role IDOR (e.g. alice reading dr.smith's medical records) and vertical privilege escalation (e.g. alice hitting `/api/admin/users`).
+
+If you want a single-persona run instead, edit `shannon/configs/vulhealth.yaml` and replace the `personas: [...]` block with a single `credentials: { username: ..., password: ... }` block — the parser auto-migrates the legacy form.
 
 ## Reset the database
 

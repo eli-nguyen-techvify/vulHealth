@@ -1,6 +1,6 @@
 # 04 — Roles & Permissions (RBAC)
 
-VulHealth defines **four roles**. This document describes the **intended** access policy so that reviewers know what the app *should* block. For the actual (weaker) implementation, cross-reference each row with [`06-security-notes.md`](./06-security-notes.md).
+VulHealth defines **four roles**. This document describes the **intended** access policy so that reviewers know what the app *should* block. For the actual (weaker) implementation, cross-reference each row with [`../06-security-notes.md`](../06-security-notes.md).
 
 ## Roles
 
@@ -96,7 +96,10 @@ Legend: ✅ allowed, ❌ blocked, ⚠️ allowed *only for own resources*, `—`
 | All `/api/users/*`                    | ✅            | ❌            | no role gate — even on `/me/change-password` |
 | All `/api/doctors`, `/api/departments`| ❌            | ❌            | public directory |
 | `/api/appointments/*`                 | ✅            | ❌            | body-based ownership, not enforced |
+| `/api/appointments/:id/status` (PATCH)| ✅            | ❌            | enum-validated; ownership not enforced |
 | `/api/records/*`                      | ✅            | ❌            | ownership not enforced |
+| `/api/records/by-doctor`              | ✅            | ❌            | scoped to `doctorId == req.user.id` |
+| `/api/records/by-patient/:patientId`  | ✅            | ❌            | ⚠️ no doctor-of-record check (BOLA-adjacent) |
 | `/api/messages/*`                     | ✅            | ❌            |       |
 | `/api/admin/users` (GET)              | ✅            | ❌            | ⚠️ missing `requireRole('admin')` |
 | `/api/admin/users/:id` (PUT)          | ✅            | ❌            | ⚠️ same |
@@ -104,8 +107,15 @@ Legend: ✅ allowed, ❌ blocked, ⚠️ allowed *only for own resources*, `—`
 | `/api/admin/logs`                     | ✅            | ❌            | ⚠️ same |
 | `/api/admin/import/departments`       | ✅            | ❌            | ⚠️ same |
 | `/api/admin/backup`                   | ✅            | ✅ `admin`    | properly gated |
+| `/api/admin/users/:id` (DELETE)       | ✅            | ✅ `admin`    | properly gated, audit-logged |
+| `/api/admin/users/:id/reset-password` | ✅            | ✅ `admin`    | properly gated, audit-logged |
+| `/api/admin/users/:id/ban`/`unban`    | ✅            | ✅ `admin`    | properly gated, audit-logged |
+| `/api/admin/appointments`             | ✅            | ✅ `admin`    | properly gated |
+| `/api/admin/records`                  | ✅            | ✅ `admin`    | properly gated |
+| `/api/admin/stats`                    | ✅            | ✅ `admin`    | properly gated |
+| `/api/admin/audit-log`                | ✅            | ✅ `admin`    | properly gated |
 
-The rows marked with ⚠️ are the main A01 Broken Access Control findings documented in [`06-security-notes.md`](./06-security-notes.md).
+The rows marked with ⚠️ are the main A01 Broken Access Control findings documented in [`../06-security-notes.md`](../06-security-notes.md).
 
 ## Future policy hardening (out of scope for this training target)
 

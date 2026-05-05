@@ -2,7 +2,7 @@
 
 This document describes what the app **is supposed to do** from an end-user perspective. It groups functionality by role. For each feature we list the user story, the key UI/API entry points, and any business rule.
 
-> Real-world security expectations (access control, auth) are described in [`04-roles-permissions.md`](./04-roles-permissions.md). The actual implementation has intentional gaps — see [`06-security-notes.md`](./06-security-notes.md).
+> Real-world security expectations (access control, auth) are described in [`../auth/04-roles-permissions.md`](../auth/04-roles-permissions.md). The actual implementation has intentional gaps — see [`../06-security-notes.md`](../06-security-notes.md).
 
 ## Public (no login)
 
@@ -33,7 +33,8 @@ This document describes what the app **is supposed to do** from an end-user pers
 - **User story**: As any user I can authenticate with username + password.
 - **UI**: `/login` form (or keyboard shortcut via Navbar link).
 - **API**: `POST /api/auth/login` → returns JWT + user profile.
-- **Post-login redirects**: admin → `/admin`, doctor → `/doctor`, others → `/`.
+- **Post-login redirects**: admin → `/admin`, doctor → `/doctor`, receptionist → `/appointments`, patient → `/`.
+- **Role-aware navbar**: only patient and guest see a "Home" link. Doctor sees Doctor Panel / Appointments / Patients / Write record / Messages. Receptionist sees Appointments / Doctors / Messages. Admin sees Admin / Messages (the navbar itself is hidden under `/admin`).
 
 ### F-06  Password reset (self-serve)
 - **User story**: If I forget my password, I can request a reset token sent to my registered email.
@@ -59,8 +60,8 @@ This document describes what the app **is supposed to do** from an end-user pers
 
 ### F-08  View my appointments
 - **User story**: As a patient I see a table of my upcoming and past appointments.
-- **UI**: `/appointments`.
-- **API**: `GET /api/appointments/mine`.
+- **UI**: `/appointments`. Each row has a **View** button that opens an *Appointment detail* modal (status, scheduled-at, doctor, department, reason, created-at; for the patient also DOB & phone).
+- **API**: `GET /api/appointments/mine`, `GET /api/appointments/:id`.
 
 ### F-09  Cancel appointment
 - **User story**: As a patient I can cancel an upcoming appointment up to 2 hours before the slot. *(2h rule is UX copy; backend does not enforce.)*
@@ -101,19 +102,33 @@ This document describes what the app **is supposed to do** from an end-user pers
 ## Doctor role
 
 ### F-15  Doctor dashboard
-- **User story**: As a doctor I land on a dashboard showing today's / upcoming appointments for me.
-- **UI**: `/doctor`.
-- **API**: `GET /api/appointments/mine` (returns appointments where `doctorId == me`).
+- **User story**: As a doctor I land on a dashboard summarising my workload.
+- **UI**: `/doctor`. Sections:
+  - Welcome card (avatar + name + role pill + quick actions: Write record / Lookup / Messages).
+  - 4 stat tiles — Total / Today / Upcoming / Completed.
+  - **Today's schedule** table (sorted by time) with **View** + **Write** actions; the **Write** button deep-links to `/doctor/write-record?appointmentId=<id>`.
+  - **Upcoming appointments** (booked + scheduledAt ≥ today, top 8).
+  - **Recent completed** (top 5 done).
+  - Appointment detail modal (shared component with `MyAppointments`).
+- **API**: `GET /api/appointments/mine`, `GET /api/appointments/:id`.
 
-### F-16  View patient medical record
-- **User story**: As a doctor I can look up any medical record I've written, by record ID, to continue treatment.
+### F-16  My patients
+- **User story**: As a doctor I see a directory of all patients I have appointments or records with, can search, and drill into a single patient to review their visits and chart.
 - **UI**: `/doctor/patients`.
-- **API**: `GET /api/records/:id`.
+  - Patient directory table (ID, Name, Visits, Records, Last visit) with search box.
+  - Stat tiles — Total patients / Appointments / Records authored / Upcoming visits.
+  - Click **Open** → patient detail screen with avatar + per-patient stat tiles, appointments list, records list, and a record-detail modal.
+  - "Quick lookup by record ID" utility kept at the bottom for compatibility.
+- **API**: `GET /api/appointments/mine`, `GET /api/records/by-doctor`, `GET /api/records/by-patient/:patientId`, `GET /api/records/:id`.
 
 ### F-17  Write medical record
-- **User story**: After an appointment, as the attending doctor I write the diagnosis, prescription, and notes.
-- **UI**: `/doctor/write-record`.
-- **API**: `POST /api/records`.
+- **User story**: After an appointment, as the attending doctor I write the diagnosis, prescription, and notes — and the appointment status flips to `done` automatically.
+- **UI**: `/doctor/write-record`. Supports deep-link `?appointmentId=<id>` from the dashboard.
+  - Dropdown of *open appointments* (doctor's appointments not already recorded, status ≠ `cancelled`).
+  - Selecting an appointment auto-fills `patientId` (read-only) and shows a Visit-context card.
+  - Optional checkbox **Mark this appointment as done after saving** (default on).
+  - On save: `POST /api/records`, then `PATCH /api/appointments/:id/status` with `{ "status": "done" }`, then refresh.
+- **API**: `POST /api/records`, `PATCH /api/appointments/:id/status`, `GET /api/records/by-doctor`.
 - **Business rules (intended)**: The record author must be the doctor who owns the referenced appointment. *(Not enforced.)*
 
 ### F-18  Upload attachment (lab, X-ray)
@@ -145,9 +160,20 @@ This document describes what the app **is supposed to do** from an end-user pers
 ## Admin role
 
 ### F-23  User management
-- **User story**: As an admin I can list all users, promote/demote roles, assign doctors to departments, and deactivate accounts.
-- **UI**: `/admin/users`.
-- **API**: `GET /api/admin/users`, `PUT /api/admin/users/:id`.
+- **User story**: As an admin I can list all users, promote/demote roles, assign doctors to departments, ban/unban accounts, generate temp passwords, and delete users.
+- **UI**: `/admin/users` — table columns: ID, Username, **Full name**, Email, Role, Password hash, Edit.
+- **API**: `GET /api/admin/users`, `PUT /api/admin/users/:id`, `DELETE /api/admin/users/:id`, `POST /api/admin/users/:id/ban|unban`, `POST /api/admin/users/:id/reset-password`.
+
+### F-23a  Admin dashboard (overview)
+- **User story**: As an admin I land on a control panel that shows the system at a glance.
+- **UI**: `/admin`. Sections:
+  - Welcome card with avatar + role pill + quick actions.
+  - 4 stat tiles — Total users, Appointments, Medical records, Banned users.
+  - "Users by role" table with role pills.
+  - "Appointments by status" table with badge pills.
+  - "Recent admin activity" table (latest 8 audit-log entries).
+  - "Quick links" tiles to other admin pages and Swagger.
+- **API**: `GET /api/admin/stats`, `GET /api/admin/audit-log`.
 
 ### F-24  System diagnostics — ping
 - **User story**: As an admin I can ping a hostname from the server to check network reachability between the backend and external systems.
@@ -185,12 +211,3 @@ This document describes what the app **is supposed to do** from an end-user pers
 
 ### F-31  Generic HTTP redirect helper
 `GET /api/redirect?url=<target>` issues a 302 to the supplied URL. Useful for deep-linking from email campaigns.
-
-## Out of scope (future work)
-
-- Real-time notifications (WebSocket).
-- SMS reminders.
-- Payment processing / insurance claims.
-- Telemedicine video calls.
-- Multi-language UI.
-- Accessibility audit (WCAG AA).
