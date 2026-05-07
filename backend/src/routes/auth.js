@@ -10,36 +10,33 @@ function md5(pw) {
   return crypto.createHash('md5').update(pw).digest('hex');
 }
 
-// VULN A03: raw SQL string concatenation — classic SQLi
-// VULN A04: no rate limit
-// VULN A07: distinct error messages → username enumeration
 router.post('/login', async (req, res, next) => {
   try {
     const { username, password } = req.body || {};
     if (!username || !password) return res.status(400).json({ error: 'username/password required' });
 
-    const hash = md5(password);
-    // !!! VULNERABLE !!! direct string interpolation
-    const sql = `SELECT id, username, email, role, fullName FROM users WHERE username = '${username}' AND passwordHash = '${hash}'`;
+    if (typeof username !== 'string' || typeof password !== 'string') {
+      return res.status(400).json({ error: 'invalid credentials' });
+    }
 
-    // Use raw exec so SQLi with ';--' and stacked operators behaves naturally
-    const user = await get(sql);
+    const hash = md5(password);
+    const user = await get(
+      'SELECT id, username, email, role, fullName FROM users WHERE username = ? AND passwordHash = ?',
+      [username, hash]
+    );
 
     if (!user) {
-      // Leak whether the username exists (account enumeration)
-      const exists = await get(`SELECT 1 FROM users WHERE username = '${username}'`);
-      if (exists) {
-        return res.status(401).json({ error: 'Invalid password for user: ' + username });
-      }
-      return res.status(401).json({ error: 'No account found with username: ' + username });
+      return res.status(401).json({ error: 'Invalid username or password' });
     }
 
     const token = sign({ id: user.id, username: user.username, role: user.role, email: user.email });
-    // VULN: cookie without Secure/HttpOnly/SameSite
-    res.cookie('token', token, { httpOnly: false, sameSite: 'lax' });
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
     res.json({ token, user });
   } catch (e) {
-    e.sql = e.sql || '(see stack)';
     next(e);
   }
 });

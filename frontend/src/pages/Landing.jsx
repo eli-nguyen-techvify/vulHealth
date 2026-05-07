@@ -40,7 +40,7 @@ export default function Landing() {
               />
               <button>Search</button>
             </form>
-            {q && <p style={{marginTop:16}}>Results for: <span dangerouslySetInnerHTML={{ __html: q }} /></p>}
+            {q && <p style={{marginTop:16}}>Results for: <span>{q}</span></p>}
             <div className="cta-row" style={{marginTop:24}}>
               {me ? (
                 <>

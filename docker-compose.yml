@@ -4,8 +4,8 @@ services:
     container_name: vulhealth-backend
     environment:
       - PORT=3001
-      - JWT_SECRET=secret
-      - NODE_ENV=development
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env or shell environment}
+      - NODE_ENV=${NODE_ENV:-development}
     ports:
       - "3001:3001"
     volumes:

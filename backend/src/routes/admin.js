@@ -107,16 +107,83 @@ router.get('/logs', requireAuth, (req, res) => {
   }
 });
 
-// VULN A10: SSRF — admin imports departments from external URL
-router.post('/import/departments', requireAuth, async (req, res, next) => {
+const net = require('net');
+const dns = require('dns').promises;
+
+// Hosts allowed for the import/departments feature. Configurable via env.
+const IMPORT_ALLOWED_HOSTS = (process.env.IMPORT_ALLOWED_HOSTS || '')
+  .split(',')
+  .map((s) => s.trim().toLowerCase())
+  .filter(Boolean);
+
+function ipIsPrivate(ip) {
+  if (!ip) return true;
+  const v = net.isIP(ip);
+  if (v === 4) {
+    const [a, b] = ip.split('.').map(Number);
+    if (a === 10) return true;
+    if (a === 127) return true;
+    if (a === 0) return true;
+    if (a === 169 && b === 254) return true;
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 192 && b === 168) return true;
+    if (a >= 224) return true; // multicast / reserved
+    return false;
+  }
+  if (v === 6) {
+    const lower = ip.toLowerCase();
+    if (lower === '::1' || lower === '::') return true;
+    if (lower.startsWith('fc') || lower.startsWith('fd')) return true; // ULA
+    if (lower.startsWith('fe80')) return true; // link-local
+    if (lower.startsWith('::ffff:')) return ipIsPrivate(lower.slice(7));
+    return true; // be conservative for v6
+  }
+  return true;
+}
+
+router.post('/import/departments', adminOnly, async (req, res) => {
   try {
     const { url } = req.body || {};
-    if (!url) return res.status(400).json({ error: 'url required' });
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({ error: 'url required' });
+    }
+
+    let parsed;
+    try {
+      parsed = new URL(url);
+    } catch (_) {
+      return res.status(400).json({ error: 'invalid url' });
+    }
+
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return res.status(400).json({ error: 'only http/https urls are allowed' });
+    }
+
+    const host = parsed.hostname.toLowerCase();
+    if (IMPORT_ALLOWED_HOSTS.length === 0 || !IMPORT_ALLOWED_HOSTS.includes(host)) {
+      return res.status(403).json({ error: 'host not in allowlist' });
+    }
+
+    const records = await dns.lookup(host, { all: true });
+    if (records.some((r) => ipIsPrivate(r.address))) {
+      return res.status(400).json({ error: 'host resolves to a private/reserved address' });
+    }
+
     const axios = require('axios');
-    const r = await axios.get(url, { timeout: 5000 });
-    res.json({ status: r.status, preview: (typeof r.data === 'string' ? r.data : JSON.stringify(r.data)).slice(0, 5000) });
+    const r = await axios.get(parsed.toString(), {
+      timeout: 5000,
+      maxRedirects: 0,
+      maxContentLength: 1_000_000,
+      responseType: 'text',
+      transformResponse: [(data) => data],
+      validateStatus: (s) => s >= 200 && s < 300,
+    });
+
+    const preview = (typeof r.data === 'string' ? r.data : JSON.stringify(r.data)).slice(0, 5000);
+    await audit(req, 'import.departments', 'url', null, { host });
+    res.json({ status: r.status, preview });
   } catch (e) {
-    res.status(502).json({ error: e.message, code: e.code });
+    res.status(502).json({ error: 'fetch failed' });
   }
 });
 
