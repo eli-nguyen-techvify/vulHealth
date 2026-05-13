@@ -11,6 +11,6 @@ COPY . .
 
 RUN mkdir -p /app/data /app/uploads
 
-EXPOSE 3001
+EXPOSE 1208
 
 CMD ["node", "src/index.js"]

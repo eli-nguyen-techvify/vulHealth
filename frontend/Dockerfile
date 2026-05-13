@@ -7,6 +7,6 @@ RUN npm install --no-audit --no-fund
 
 COPY . .
 
-EXPOSE 4000
+EXPOSE 8120
 
 CMD ["npm", "run", "dev"]
