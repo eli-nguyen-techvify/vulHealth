@@ -59,7 +59,7 @@ export default function Messages() {
             <button className="secondary" onClick={() => setSelected(null)}>← Back</button>
             <h4>{selected.subject || '(no subject)'}</h4>
             <p><small>From: {selected.fromName || selected.fromUsername} · {selected.createdAt}</small></p>
-            <div dangerouslySetInnerHTML={{ __html: selected.body }} />
+            <div style={{ whiteSpace: 'pre-wrap' }}>{selected.body}</div>
           </div>
         ) : (
           <table>

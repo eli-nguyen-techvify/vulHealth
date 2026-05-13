@@ -64,7 +64,7 @@ export default function DoctorDetail() {
 
       <div className="card profile-section">
         <h3>About</h3>
-        <div dangerouslySetInnerHTML={{ __html: doc.bio || '<em>No bio.</em>' }} />
+        <div style={{ whiteSpace: 'pre-wrap' }}>{doc.bio || <em>No bio.</em>}</div>
       </div>
 
       <div className="card profile-section">

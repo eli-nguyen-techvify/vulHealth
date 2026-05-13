@@ -1,8 +1,10 @@
 const express = require('express');
 const axios = require('axios');
+const dns = require('dns').promises;
 const _ = require('lodash');
 const { get, run, all } = require('../db');
 const { requireAuth } = require('../middleware/auth');
+const { ipIsPrivate } = require('../utils/net');
 
 const router = express.Router();
 
@@ -30,24 +32,47 @@ router.put('/me', requireAuth, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-// VULN A10: SSRF — fetches raw URL supplied by user
-router.post('/me/avatar-from-url', requireAuth, async (req, res, next) => {
+router.post('/me/avatar-from-url', requireAuth, async (req, res) => {
   try {
     const { url } = req.body || {};
-    if (!url) return res.status(400).json({ error: 'url required' });
-    // VULNERABLE: no URL allowlist, no scheme/IP filter → can hit 169.254.169.254, localhost, internal services
-    const r = await axios.get(url, { timeout: 5000, maxRedirects: 5, responseType: 'text' });
-    // Leak the fetched content in the response — makes SSRF trivially exploitable
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({ error: 'url required' });
+    }
+
+    let parsed;
+    try { parsed = new URL(url); } catch (_) {
+      return res.status(400).json({ error: 'invalid url' });
+    }
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return res.status(400).json({ error: 'only http/https urls are allowed' });
+    }
+
+    const records = await dns.lookup(parsed.hostname, { all: true });
+    if (records.length === 0 || records.some((r) => ipIsPrivate(r.address))) {
+      return res.status(400).json({ error: 'host resolves to a private/reserved address' });
+    }
+
+    const r = await axios.get(parsed.toString(), {
+      timeout: 5000,
+      maxRedirects: 0,
+      maxContentLength: 5 * 1024 * 1024,
+      responseType: 'arraybuffer',
+      validateStatus: (s) => s >= 200 && s < 300,
+    });
+
+    const contentType = String(r.headers['content-type'] || '').toLowerCase();
+    if (!contentType.startsWith('image/')) {
+      return res.status(400).json({ error: 'response is not an image' });
+    }
+
     res.json({
       message: 'Avatar fetched',
-      url,
       status: r.status,
-      headers: r.headers,
-      body: typeof r.data === 'string' ? r.data.slice(0, 10000) : r.data,
+      contentType,
+      size: r.data?.byteLength || 0,
     });
-  } catch (e) {
-    // leak error info too
-    res.status(502).json({ error: e.message, code: e.code, stack: e.stack });
+  } catch (_) {
+    res.status(502).json({ error: 'fetch failed' });
   }
 });
 

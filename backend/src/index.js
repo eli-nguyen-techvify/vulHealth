@@ -7,7 +7,7 @@ const swaggerUi = require('swagger-ui-express');
 
 const db = require('./db');
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3005;
 const app = express();
 
 // VULN A05: permissive CORS with credentials

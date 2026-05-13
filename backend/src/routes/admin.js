@@ -1,5 +1,5 @@
 const express = require('express');
-const { exec } = require('child_process');
+const { exec, execFile } = require('child_process');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
@@ -68,17 +68,18 @@ router.get('/users', requireAuth, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-// VULN A03: Command injection via `host`
-router.post('/ping', requireAuth, (req, res) => {
+const HOSTNAME_RE = /^[a-zA-Z0-9][a-zA-Z0-9.-]{0,252}$/;
+router.post('/ping', adminOnly, (req, res) => {
   const host = (req.body && req.body.host) || '';
-  if (!host) return res.status(400).json({ error: 'host required' });
-  // VULNERABLE: raw concatenation into shell
-  exec(`ping -c 1 ${host}`, { timeout: 5000 }, (err, stdout, stderr) => {
+  if (!host || typeof host !== 'string' || !HOSTNAME_RE.test(host)) {
+    return res.status(400).json({ error: 'invalid host' });
+  }
+  execFile('ping', ['-c', '1', '-W', '3', host], { timeout: 5000 }, (err, stdout, stderr) => {
     res.json({
-      command: `ping -c 1 ${host}`,
-      stdout: stdout || '',
-      stderr: stderr || '',
-      error: err ? err.message : null,
+      host,
+      stdout: (stdout || '').slice(0, 4000),
+      stderr: (stderr || '').slice(0, 1000),
+      error: err ? 'ping failed' : null,
     });
   });
 });

@@ -3,11 +3,11 @@ services:
     build: ./backend
     container_name: vulhealth-backend
     environment:
-      - PORT=3001
+      - PORT=3005
       - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env or shell environment}
       - NODE_ENV=${NODE_ENV:-development}
     ports:
-      - "3001:3001"
+      - "3005:3005"
     volumes:
       - ./backend/data:/app/data
       - ./backend/uploads:/app/uploads
@@ -17,7 +17,7 @@ services:
     build: ./frontend
     container_name: vulhealth-frontend
     environment:
-      - BACKEND_URL=http://backend:3001
+      - BACKEND_URL=http://backend:3005
     ports:
       - "4000:4000"
     volumes:
